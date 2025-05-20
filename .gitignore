@@ -1,1 +1,18 @@
+# Ignore all contents inside the data directory
 /data/*
+
+# But track the data directory itself by not ignoring .gitkeep
+!/data/.gitkeep
+
+# Python-related files
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Other common files to ignore
+.DS_Store
+.env
+.venv
+env/
+venv/
