@@ -7,7 +7,7 @@ git clone https://github.com/QuantResearchTeam/futures-market-analysis.git
 cd futures-market-analysis
 ```
 
-### 2. Set Up Data (50GB)
+### 2. Set Up Data
 
 This project uses a large dataset not tracked in Git. The data is organized by market:
 
