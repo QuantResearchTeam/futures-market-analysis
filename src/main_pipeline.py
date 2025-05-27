@@ -37,12 +37,13 @@ def run_pipeline_for_single_ric(lob_df_for_ric, hedge_df_for_ric, specific_ric,
         print(f"LOB data for {specific_ric} became empty after filtering. Skipping this RIC.")
         return None
     
-    print("Step 2.2: Adding public features to LOB data...")
-    df_lob_enriched = add_public_lob_features(df_lob_filtered, verbose=verbose)
-    if df_lob_enriched.empty:
-        print(f"LOB data for {specific_ric} became empty after adding features. Skipping this RIC.")
-        return None
-    print(f"Enriched LOB data shape for {specific_ric}: {df_lob_enriched.shape}")
+    #pp - removing it for now as its memory inefficient 
+    #print("Step 2.2: Adding public features to LOB data...")
+    #df_lob_enriched = add_public_lob_features(df_lob_filtered, verbose=verbose)
+    #if df_lob_enriched.empty:
+    #    print(f"LOB data for {specific_ric} became empty after adding features. Skipping this RIC.")
+    #    return None
+    #print(f"Enriched LOB data shape for {specific_ric}: {df_lob_enriched.shape}")
 
     # 4. Preprocess Hedge Data for this RIC
     print("\nStep 3.1: Filtering and Preparing hedge data...")
@@ -56,7 +57,7 @@ def run_pipeline_for_single_ric(lob_df_for_ric, hedge_df_for_ric, specific_ric,
     print("\nStep 4.1: Matching hedges to LOB states...")
     df_matched_data = match_hedges_to_lob(
         df_hedge_cleaned, 
-        df_lob_enriched, 
+        df_lob_filtered,
         time_threshold_seconds,
         tick_size=instrument_tick_size,
     )
@@ -103,6 +104,7 @@ def main_orchestrator(index_name, specific_ric_to_process, index_family_for_hedg
     # 1. Load Initial LOB Data (either all for index, or just for specific_ric)
     print("\nStep 1: Loading initial LOB data...")
     df_lob_initial = load_lob_data(base_data_path, index_name, specific_ric=specific_ric_to_process)
+    print(f"Initial LOB data shape for {index_name}: {df_lob_initial.shape}")
     if df_lob_initial.empty:
         print(f"Failed to load any LOB data. Exiting pipeline.")
         return
@@ -116,6 +118,7 @@ def main_orchestrator(index_name, specific_ric_to_process, index_family_for_hedg
         rics_to_process = [specific_ric_to_process]
     else:
         rics_to_process = df_lob_initial['Alias Underlying RIC'].unique()
+        print(f"Found RICs to process in LOB data for index {index_name}: {list(rics_to_process)}")
         if not rics_to_process.size: # handle case where unique returns empty array
             print(f"No unique RICs found in LOB data for index {index_name}. Exiting.")
             return

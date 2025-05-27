@@ -19,37 +19,40 @@ def load_lob_data(base_lob_path, index_name, specific_ric=None, start_date=None,
         pd.DataFrame: Concatenated LOB data.
     """
     # Construct the directory path based on index_name, assuming a pattern like INDEX_2024_data_parquet
-    # You might need to adjust this if your directory naming is different
     lob_dir = os.path.join(base_lob_path, f"{index_name}_2024_data_parquet") 
-    
     if not os.path.isdir(lob_dir):
         print(f"Error: LOB directory not found: {lob_dir}")
         return pd.DataFrame()
 
-    df_list = []
     print(f"Loading LOB data from: {lob_dir}")
     date_filtered_files = []
-    # create a list of all parquet files within the start and end date if provided
     if start_date and end_date:
         for file in os.listdir(lob_dir):
             if file.endswith('.parquet'):
                 file_path = os.path.join(lob_dir, file)
-                df_temp = pd.read_parquet(file_path)
                 date_filtered_files.append(file_path)
         print(f"Date-filtered LOB files: {date_filtered_files}")
     else:
-        # If no date filtering, load all files
         for file in os.listdir(lob_dir):
             if file.endswith('.parquet'):
                 date_filtered_files.append(os.path.join(lob_dir, file))
 
+    df_list = []
     for file_path in date_filtered_files:
         try:
-            df_temp = pd.read_parquet(file_path)
-            if specific_ric and 'Alias Underlying RIC' in df_temp.columns:
-                df_temp = df_temp[df_temp['Alias Underlying RIC'] == specific_ric]
-            if not df_temp.empty:
-                df_list.append(df_temp)
+            df_temp = pd.read_parquet(file_path, columns=None if not specific_ric else ['Alias Underlying RIC'])
+            if specific_ric:
+                if 'Alias Underlying RIC' in df_temp.columns:
+                    if specific_ric in df_temp['Alias Underlying RIC'].values:
+                        df_temp = pd.read_parquet(file_path)
+                        df_temp = df_temp[df_temp['Alias Underlying RIC'] == specific_ric]
+                        if not df_temp.empty:
+                            df_list.append(df_temp)
+                # else: skip file
+            else:
+                df_temp = pd.read_parquet(file_path)
+                if not df_temp.empty:
+                    df_list.append(df_temp)
         except Exception as e:
             print(f"Error reading or processing LOB file {file_path}: {e}")
 

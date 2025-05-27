@@ -17,7 +17,7 @@ def find_closest_lob_indexes(df_h_sorted_for_lookup, df_o_prepared_sorted, hedge
         print(f"Warning: NaT hedge_time at irow {hedge_irow}. Cannot find LOB window.")
         return -1, -1
 
-    lower_bound = hedge_time - pd.Timedelta(seconds=t_threshold_seconds)
+    lower_bound = hedge_time - pd.Timedelta(seconds=1) # pp - using assymetric time interval
     upper_bound = hedge_time + pd.Timedelta(seconds=t_threshold_seconds)
     
     if df_o_prepared_sorted.empty or 'lob_time' not in df_o_prepared_sorted.columns:
